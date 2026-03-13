@@ -2,6 +2,10 @@ import AMapFoundationKit
 import AMapLocationKit
 import MAMapKit
 
+extension Notification.Name {
+    static let gaodeMapPrivacyStatusDidChange = Notification.Name("ExpoGaodeMapPrivacyStatusDidChange")
+}
+
 enum GaodeMapPrivacyManager {
     private(set) static var hasShow = false
     private(set) static var hasContainsPrivacy = false
@@ -12,14 +16,18 @@ enum GaodeMapPrivacyManager {
     }
 
     static func setPrivacyShow(_ show: Bool, hasContainsPrivacy: Bool) {
+        let previousStatus = status()
         hasShow = show
         self.hasContainsPrivacy = hasContainsPrivacy
         applyPrivacyState()
+        notifyIfNeeded(previousStatus: previousStatus)
     }
 
     static func setPrivacyAgree(_ agree: Bool) {
+        let previousStatus = status()
         hasAgree = agree
         applyPrivacyState()
+        notifyIfNeeded(previousStatus: previousStatus)
     }
 
     static func applyPrivacyState() {
@@ -40,5 +48,18 @@ enum GaodeMapPrivacyManager {
             "hasAgree": hasAgree,
             "isReady": isReady,
         ]
+    }
+
+    private static func notifyIfNeeded(previousStatus: [String: Bool]) {
+        let currentStatus = status()
+        guard NSDictionary(dictionary: previousStatus).isEqual(to: currentStatus) == false else {
+            return
+        }
+
+        NotificationCenter.default.post(
+            name: .gaodeMapPrivacyStatusDidChange,
+            object: nil,
+            userInfo: currentStatus
+        )
     }
 }

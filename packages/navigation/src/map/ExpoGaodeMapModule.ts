@@ -297,6 +297,7 @@ const helperMethods = {
    * 引导用户手动授予权限
    */
   openAppSettings(): void {
+    const nativeModule = getNativeModule();
     if (!nativeModule) {
       throw ErrorHandler.nativeModuleUnavailable();
     }
@@ -308,6 +309,7 @@ const helperMethods = {
   },
 
   setAllowsBackgroundLocationUpdates(allows: boolean): void {
+    const nativeModule = getNativeModule();
     if (!nativeModule) {
       throw ErrorHandler.nativeModuleUnavailable();
     }
@@ -354,14 +356,18 @@ const helperMethods = {
    * 注意：如果使用 Config Plugin 配置了 API Key，无需调用 initSDK()
    */
   addLocationListener(listener: LocationListener): { remove: () => void } {
-    if (!nativeModule) {
+    const module = getNativeModule();
+    if (!module) {
       throw ErrorHandler.nativeModuleUnavailable();
     }
-    if (!nativeModule?.addListener) {
+    if (!module.addListener) {
       ErrorLogger.warn('Native module does not support events');
+      return {
+        remove: () => { },
+      };
     }
-   
-    return nativeModule?.addListener?.('onLocationUpdate', listener) || {
+
+    return module.addListener('onLocationUpdate', listener) || {
       remove: () => { },
     };
   },

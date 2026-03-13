@@ -18,23 +18,28 @@ object SDKInitializer {
     private var privacyShown = false
     private var privacyContains = false
 
+    private fun resolveContext(context: Context): Context {
+        return context.applicationContext ?: context
+    }
+
     fun setPrivacyShow(context: Context, hasShow: Boolean, hasContainsPrivacy: Boolean) {
         privacyShown = hasShow
         privacyContains = hasContainsPrivacy
-        applyPrivacyState(context)
+        applyPrivacyState(resolveContext(context))
     }
 
     fun setPrivacyAgree(context: Context, hasAgree: Boolean) {
         privacyAgreed = hasAgree
-        applyPrivacyState(context)
+        applyPrivacyState(resolveContext(context))
     }
 
     fun applyPrivacyState(context: Context) {
+        val appContext = resolveContext(context)
         try {
-            MapsInitializer.updatePrivacyShow(context, privacyShown, privacyContains)
-            AMapLocationClient.updatePrivacyShow(context, privacyShown, privacyContains)
-            MapsInitializer.updatePrivacyAgree(context, privacyAgreed)
-            AMapLocationClient.updatePrivacyAgree(context, privacyAgreed)
+            MapsInitializer.updatePrivacyShow(appContext, privacyShown, privacyContains)
+            AMapLocationClient.updatePrivacyShow(appContext, privacyShown, privacyContains)
+            MapsInitializer.updatePrivacyAgree(appContext, privacyAgreed)
+            AMapLocationClient.updatePrivacyAgree(appContext, privacyAgreed)
         } catch (e: Exception) {
             android.util.Log.w("ExpoGaodeMap", "同步隐私状态失败: ${e.message}")
         }
@@ -61,13 +66,14 @@ object SDKInitializer {
      * @throws Exception 初始化失败时抛出异常
      */
     fun initSDK(context: Context, androidKey: String) {
+        val appContext = resolveContext(context)
         // 检查隐私协议状态
         if (!isPrivacyReady()) {
             throw expo.modules.kotlin.exception.CodedException("隐私协议未完成确认，请先调用 setPrivacyShow/setPrivacyAgree")
         }
         
         try {
-            applyPrivacyState(context)
+            applyPrivacyState(appContext)
             // 设置 API Key
             MapsInitializer.setApiKey(androidKey)
             AMapLocationClient.setApiKey(androidKey)

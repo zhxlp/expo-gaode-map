@@ -42,6 +42,10 @@ public class ExpoGaodeMapModule: Module {
     
     public func definition() -> ModuleDefinition {
         Name("ExpoGaodeMap")
+
+        OnCreate {
+            _ = self.trySetupApiKeyFromPlist()
+        }
         
         Function("setPrivacyShow") { (hasShow: Bool, hasContainsPrivacy: Bool) in
             GaodeMapPrivacyManager.setPrivacyShow(hasShow, hasContainsPrivacy: hasContainsPrivacy)

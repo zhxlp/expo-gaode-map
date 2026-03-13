@@ -8,6 +8,7 @@ import type {
   Point,
   LatLngPoint,
 } from './types';
+import ExpoGaodeMapModule from './ExpoGaodeMapModule';
 import { normalizeLatLng } from './utils/GeoUtils';
 import { ErrorHandler } from './utils/ErrorHandler';
 import { MapContext } from './components/MapContext';
@@ -39,6 +40,11 @@ const getNativeView = createLazyNativeViewManager<MapViewProps & { ref?: React.R
  * 所有API方法都会检查地图是否已初始化，未初始化时抛出错误
  */
 const ExpoGaodeMapView = React.forwardRef<MapViewRef, MapViewProps>((props, ref) => {
+  const privacyStatus = ExpoGaodeMapModule.getPrivacyStatus();
+  if (!privacyStatus.isReady) {
+    throw ErrorHandler.privacyNotAgreed('map');
+  }
+
   const nativeRef = React.useRef<MapViewRef>(null);
   const internalRef = React.useRef<MapViewRef | null>(null);
   const NativeView = React.useMemo(() => getNativeView(), []);

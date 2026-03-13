@@ -5,21 +5,39 @@
 ## 基本初始化流程
 
 ::: warning 重要：隐私合规
-根据中国大陆法律法规要求，**必须在用户首次同意隐私协议后** 。现在原生端会自动处理，无需额外处理。
+根据中国大陆法律法规要求，**必须在用户首次同意隐私协议后**，再调用任何高德 SDK 相关能力。
+当前版本不会自动替你完成这一步；你需要在运行时显式调用：
+- `ExpoGaodeMapModule.setPrivacyShow(true, true)`
+- `ExpoGaodeMapModule.setPrivacyAgree(true)`
 :::
 
 ### 1. 隐私合规（首次使用时）
 
-### 无需任何额外处理，原始端已经自动处理
+```tsx
+import { ExpoGaodeMapModule } from 'expo-gaode-map';
+
+ExpoGaodeMapModule.setPrivacyShow(true, true);
+ExpoGaodeMapModule.setPrivacyAgree(true);
+```
+
+推荐流程：
+1. 首次进入应用先展示你的隐私协议页面
+2. 用户点击同意后调用 `setPrivacyShow` 和 `setPrivacyAgree`
+3. 然后再调用 `initSDK`
+4. 最后再请求定位权限、渲染地图或调用搜索/定位能力
 
 ### 2. SDK 初始化
 
-在应用启动时初始化 SDK：
+在隐私确认完成后初始化 SDK：
 
 ```tsx
 import { ExpoGaodeMapModule } from 'expo-gaode-map';
 
 useEffect(() => {
+  // 1. 先完成隐私合规
+  ExpoGaodeMapModule.setPrivacyShow(true, true);
+  ExpoGaodeMapModule.setPrivacyAgree(true);
+
   // 如果需要开启世界地图（海外地图）
   // 必须在 initSDK 之前调用
   // 世界地图为高级服务，需要开通相关权限：
@@ -27,18 +45,22 @@ useEffect(() => {
   // 2.通过 工单 联系商务开通
   // ExpoGaodeMapModule.setLoadWorldVectorMap(true);
 
-  // 初始化 SDK （仅需要 Web API Key 调用，默认会加载 Android 和 iOS 端的 API Key）
+  // 2. 初始化 SDK（使用 Config Plugin 时原生 key 可省略）
   ExpoGaodeMapModule.initSDK({
     webKey: 'your-web-api-key', // 使用 Web API 服务时需要
   });
 }, []);
-``````
+```
 
 ::: tip Config Plugin 自动配置
-如果使用了 Config Plugin，原生 API Key 会自动配置到原生项目中，**initSDK 可以不调用或只传 webKey**（更安全）。
+如果使用了 Config Plugin，原生 API Key 会自动配置到原生项目中，**但运行时隐私步骤仍必须手动调用**。
+推荐仍在用户同意隐私后执行一次 `initSDK`，这样地图、定位、Web API 的初始化行为更一致。
 
 ```tsx
-// 使用 Config Plugin 时
+ExpoGaodeMapModule.setPrivacyShow(true, true);
+ExpoGaodeMapModule.setPrivacyAgree(true);
+
+// 使用 Config Plugin 时，原生 key 可省略
 ExpoGaodeMapModule.initSDK({
   webKey: 'your-web-api-key', // 仅在使用 Web API 时需要
 });
@@ -143,17 +165,19 @@ export default function App() {
   useEffect(() => {
   
     const initializeApp = async () => {
+      // 1. 先完成隐私合规
+      ExpoGaodeMapModule.setPrivacyShow(true, true);
+      ExpoGaodeMapModule.setPrivacyAgree(true);
 
-      // 1.请求定位权限
-       await requestPermission();
-
-      // 2. 初始化 SDK（使用 Config Plugin 时可传空对象）
+      // 2. 初始化 SDK（使用 Config Plugin 时原生 key 可省略）
       ExpoGaodeMapModule.initSDK({
         webKey: 'your-web-api-key', // 仅在使用 Web API 时需要
       });
-      
-  
-      // 3. 获取当前位置
+
+      // 3. 请求定位权限
+      await requestPermission();
+
+      // 4. 获取当前位置
       const location = await ExpoGaodeMapModule.getCurrentLocation();
       setInitialPosition({
           target: {
@@ -185,6 +209,10 @@ export default function App() {
 ### Q: 使用 Config Plugin 后还需要配置 API Key 吗？
 
 A: 原生 API Key 不需要，Config Plugin 会自动配置。但如果要使用 Web API 服务（`expo-gaode-map-web-api`），仍需在 `initSDK` 中传入 `webKey`。
+
+### Q: 使用 Config Plugin 后，还需要调用隐私接口吗？
+
+A: **需要。**Config Plugin 只负责原生 key、权限声明等静态配置；`setPrivacyShow` / `setPrivacyAgree` 属于运行时合规步骤，必须在用户同意后手动调用。
 
 ### Q: 如何处理用户拒绝权限的情况?
 

@@ -3,6 +3,10 @@
 Complete location functionality API documentation.
 
 > ⚠️ **Permission Required**: All location APIs require location permission. Please check and request permission before use.
+>
+> ⚠️ **Privacy Required**: Before calling `initSDK`, map, location, or other AMap capabilities, call:
+> - `ExpoGaodeMapModule.setPrivacyShow(true, true)`
+> - `ExpoGaodeMapModule.setPrivacyAgree(true)`
 
 ## Location Control
 
@@ -11,7 +15,11 @@ All location APIs are called through `ExpoGaodeMapModule`:
 ```tsx
 import { ExpoGaodeMapModule } from 'expo-gaode-map';
 
-// Initialize SDK
+// 1. Complete privacy compliance
+ExpoGaodeMapModule.setPrivacyShow(true, true);
+ExpoGaodeMapModule.setPrivacyAgree(true);
+
+// 2. Initialize SDK
 ExpoGaodeMapModule.initSDK({
   androidKey: 'your-android-api-key',
   iosKey: 'your-ios-api-key',
@@ -31,7 +39,9 @@ const location = await ExpoGaodeMapModule.getCurrentLocation();
 
 | Method | Parameters | Return | Description |
 |--------|------------|--------|-------------|
-| `initSDK` | `{androidKey, iosKey}` | `void` | Initialize SDK |
+| `initSDK` | `{androidKey?, iosKey?, webKey?}` | `void` | Initialize SDK |
+| `setPrivacyShow` | `(hasShow: boolean, hasContainsPrivacy: boolean)` | `void` | Sync privacy notice display status before `initSDK` |
+| `setPrivacyAgree` | `(hasAgree: boolean)` | `void` | Sync user privacy consent status before `initSDK` |
 | `setLoadWorldVectorMap` | `enabled: boolean` | `void` | Enable/Disable world vector map (Overseas map). Must be called before initialization |
 | `start` | - | `void` | Start continuous location |
 | `stop` | - | `void` | Stop location |
@@ -159,6 +169,9 @@ export default function LocationExample() {
 
   useEffect(() => {
     const init = async () => {
+      ExpoGaodeMapModule.setPrivacyShow(true, true);
+      ExpoGaodeMapModule.setPrivacyAgree(true);
+
       // Initialize
       ExpoGaodeMapModule.initSDK({
         androidKey: 'your-android-key',

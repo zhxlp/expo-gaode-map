@@ -8,7 +8,7 @@ Complete API reference documentation.
 > 1. ✅ Required permissions are configured in native project
 > 2. ✅ Request user authorization at runtime
 > 3. ✅ Comply with privacy laws and regulations
-> 4. ✅ Configure AMap SDK privacy compliance interface
+> 4. ✅ Call `setPrivacyShow(true, true)` and `setPrivacyAgree(true)` before `initSDK`
 
 ## Table of Contents
 
@@ -49,6 +49,10 @@ import { MapView } from 'expo-gaode-map';
 
 ```tsx
 import { ExpoGaodeMapModule } from 'expo-gaode-map';
+
+// Complete privacy compliance first
+ExpoGaodeMapModule.setPrivacyShow(true, true);
+ExpoGaodeMapModule.setPrivacyAgree(true);
 
 // Initialize SDK
 ExpoGaodeMapModule.initSDK({

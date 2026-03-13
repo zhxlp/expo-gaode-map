@@ -6,6 +6,7 @@ import type { NativeModule } from 'expo';
 
 import type {
   LatLng,
+  PrivacyStatus,
   SDKConfig,
   PermissionStatus,
   LatLngPoint,
@@ -39,6 +40,12 @@ export interface ExpoGaodeMapModule extends NativeModule<ExpoGaodeMapModuleEvent
    * @param config SDK 配置参数，包含 Android 和 iOS 的 API Key
    */
   initSDK(config: SDKConfig): void;
+
+  setPrivacyShow(hasShow: boolean, hasContainsPrivacy: boolean): void;
+
+  setPrivacyAgree(hasAgree: boolean): void;
+
+  getPrivacyStatus(): PrivacyStatus;
 
   /**
    * 设置是否加载世界向量地图（海外地图）

@@ -16,6 +16,13 @@ export interface SDKConfig {
   webKey?: string;
 }
 
+export interface PrivacyStatus {
+  hasShow: boolean;
+  hasContainsPrivacy: boolean;
+  hasAgree: boolean;
+  isReady: boolean;
+}
+
 /**
  * 权限状态（增强版，支持 Android 14+ 和 iOS 17+）
  */

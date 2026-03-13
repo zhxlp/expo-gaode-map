@@ -86,7 +86,11 @@ If you prefer manual configuration, see [Initialization Guide](./initialization)
 ```typescript
 import { ExpoGaodeMapModule } from 'expo-gaode-map';
 
-// Initialize before using any map features
+// 1. Complete privacy compliance first
+ExpoGaodeMapModule.setPrivacyShow(true, true);
+ExpoGaodeMapModule.setPrivacyAgree(true);
+
+// 2. Initialize before using any map features
 ExpoGaodeMapModule.initSDK({
   androidKey: 'your-android-api-key',
   iosKey: 'your-ios-api-key',
@@ -142,8 +146,8 @@ export default function App() {
   async function initializeMap() {
     try {
       // 1. Configure privacy compliance
-      ExpoGaodeMapModule.updatePrivacyAgree(true);
-      ExpoGaodeMapModule.updatePrivacyShow(true, true);
+      ExpoGaodeMapModule.setPrivacyAgree(true);
+      ExpoGaodeMapModule.setPrivacyShow(true, true);
 
       // 2. Initialize SDK
       ExpoGaodeMapModule.initSDK({

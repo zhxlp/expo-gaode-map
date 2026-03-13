@@ -11,36 +11,50 @@ import {
 } from './types';
 import type { ExpoGaodeMapModule } from './types/native-module.types';
 import { ErrorHandler, ErrorLogger } from './utils/ErrorHandler';
-import { SDKConfig, PermissionStatus } from './types/common.types';
+import { PrivacyStatus, SDKConfig, PermissionStatus } from './types/common.types';
 import { normalizeLatLng, normalizeLatLngList } from './utils/GeoUtils';
 
-// 获取原生模块实例 - 添加容错处理
-let nativeModule: ExpoGaodeMapModule | null = null;
+let nativeModuleCache: ExpoGaodeMapModule | null = null;
 
-try {
-  nativeModule = requireNativeModule<ExpoGaodeMapModule>('ExpoGaodeMap');
-} catch (error) {
-  console.error('Failed to load ExpoGaodeMap native module:', error);
-  const moduleError = ErrorHandler.nativeModuleUnavailable();
-  ErrorLogger.log(moduleError);
+function getNativeModule(optional = false): ExpoGaodeMapModule | null {
+  if (nativeModuleCache) {
+    return nativeModuleCache;
+  }
+
+  try {
+    nativeModuleCache = requireNativeModule<ExpoGaodeMapModule>('ExpoGaodeMap');
+    return nativeModuleCache;
+  } catch (error) {
+    if (optional) {
+      return null;
+    }
+    const moduleError = ErrorHandler.nativeModuleUnavailable();
+    ErrorLogger.log(moduleError);
+    throw moduleError;
+  }
 }
+
+const nativeModule = new Proxy({} as ExpoGaodeMapModule, {
+  get(_target, prop) {
+    const module = getNativeModule(true);
+    return module ? Reflect.get(module as object, prop) : undefined;
+  },
+});
 
 // 记录最近一次 initSDK 的配置（含 webKey）
 let _sdkConfig: SDKConfig | null = null;
 let _isSDKInitialized = false;
 
 // 扩展原生模块，添加便捷方法
-const ExpoGaodeMapModuleWithHelpers = {
-  ...(nativeModule || {}),
+const helperMethods = {
 
   /**
    * 初始化 SDK，并缓存配置（包含 webKey）
    * 注意：允许不提供任何 API Key，因为原生端可能已通过 Config Plugin 配置
    */
   initSDK(config: SDKConfig): void {
-    if (!nativeModule) {
-      throw ErrorHandler.nativeModuleUnavailable();
-    }
+    const nativeModule = getNativeModule();
+    if (!nativeModule) throw ErrorHandler.nativeModuleUnavailable();
     try {
 
        // 检查是否有任何 key 被提供
@@ -74,7 +88,44 @@ const ExpoGaodeMapModuleWithHelpers = {
     return _isSDKInitialized;
   },
 
+  setPrivacyShow(hasShow: boolean, hasContainsPrivacy: boolean): void {
+    const nativeModule = getNativeModule();
+    if (!nativeModule) throw ErrorHandler.nativeModuleUnavailable();
+    nativeModule.setPrivacyShow(hasShow, hasContainsPrivacy);
+  },
+
+  setPrivacyAgree(hasAgree: boolean): void {
+    const nativeModule = getNativeModule();
+    if (!nativeModule) throw ErrorHandler.nativeModuleUnavailable();
+    nativeModule.setPrivacyAgree(hasAgree);
+  },
+
+  setPrivacyConfig(config: {
+    hasShow: boolean;
+    hasContainsPrivacy: boolean;
+    hasAgree: boolean;
+  }): void {
+    const nativeModule = getNativeModule();
+    if (!nativeModule) throw ErrorHandler.nativeModuleUnavailable();
+    nativeModule.setPrivacyShow(config.hasShow, config.hasContainsPrivacy);
+    nativeModule.setPrivacyAgree(config.hasAgree);
+  },
+
+  getPrivacyStatus(): PrivacyStatus {
+    const nativeModule = getNativeModule();
+    if (!nativeModule) {
+      return {
+        hasShow: false,
+        hasContainsPrivacy: false,
+        hasAgree: false,
+        isReady: false,
+      };
+    }
+    return nativeModule.getPrivacyStatus();
+  },
+
   calculateDistanceBetweenPoints(p1: LatLngPoint, p2: LatLngPoint): number {
+    const nativeModule = getNativeModule();
     if (!nativeModule) {
       throw ErrorHandler.nativeModuleUnavailable();
     }
@@ -85,6 +136,7 @@ const ExpoGaodeMapModuleWithHelpers = {
   },
 
   calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const nativeModule = getNativeModule();
     if (!nativeModule) {
       throw ErrorHandler.nativeModuleUnavailable();
     }
@@ -95,6 +147,7 @@ const ExpoGaodeMapModuleWithHelpers = {
   },
 
   setLoadWorldVectorMap(enabled: boolean): void {
+    const nativeModule = getNativeModule(true);
     if (!nativeModule) return;
     try {
       nativeModule.setLoadWorldVectorMap(enabled);
@@ -104,6 +157,7 @@ const ExpoGaodeMapModuleWithHelpers = {
   },
 
   getVersion(): string {
+    const nativeModule = getNativeModule(true);
     if (!nativeModule) return '0.0.0';
     try {
       return nativeModule.getVersion();
@@ -114,6 +168,7 @@ const ExpoGaodeMapModuleWithHelpers = {
   },
 
   start(): void {
+    const nativeModule = getNativeModule(true);
     if (!nativeModule) return;
     try {
       nativeModule.start();
@@ -123,6 +178,7 @@ const ExpoGaodeMapModuleWithHelpers = {
   },
 
   stop(): void {
+    const nativeModule = getNativeModule(true);
     if (!nativeModule) return;
     try {
       nativeModule.stop();
@@ -132,6 +188,7 @@ const ExpoGaodeMapModuleWithHelpers = {
   },
 
   isStarted(): Promise<boolean> {
+    const nativeModule = getNativeModule(true);
     if (!nativeModule) return Promise.resolve(false);
     try {
       return nativeModule.isStarted();
@@ -142,6 +199,7 @@ const ExpoGaodeMapModuleWithHelpers = {
   },
 
   async getCurrentLocation(): Promise<Coordinates | ReGeocode> {
+    const nativeModule = getNativeModule();
     if (!nativeModule) {
       throw ErrorHandler.nativeModuleUnavailable();
     }
@@ -153,6 +211,7 @@ const ExpoGaodeMapModuleWithHelpers = {
   },
 
   async coordinateConvert(coordinate: LatLngPoint, type: CoordinateType): Promise<LatLng> {
+    const nativeModule = getNativeModule();
     if (!nativeModule) {
       throw ErrorHandler.nativeModuleUnavailable();
     }
@@ -164,6 +223,7 @@ const ExpoGaodeMapModuleWithHelpers = {
   },
 
   setLocatingWithReGeocode(isReGeocode: boolean): void {
+    const nativeModule = getNativeModule(true);
     if (!nativeModule) return;
     try {
       nativeModule.setLocatingWithReGeocode(isReGeocode);
@@ -173,6 +233,7 @@ const ExpoGaodeMapModuleWithHelpers = {
   },
 
   get isBackgroundLocationEnabled(): boolean {
+    const nativeModule = getNativeModule(true);
     if (!nativeModule) return false;
     return nativeModule.isBackgroundLocationEnabled === true;
   },
@@ -181,6 +242,7 @@ const ExpoGaodeMapModuleWithHelpers = {
    * 检查位置权限状态
    */
   async checkLocationPermission(): Promise<PermissionStatus> {
+    const nativeModule = getNativeModule();
     if (!nativeModule) {
       throw ErrorHandler.nativeModuleUnavailable();
     }
@@ -195,6 +257,7 @@ const ExpoGaodeMapModuleWithHelpers = {
    * 请求前台位置权限（增强版）
    */
   async requestLocationPermission(): Promise<PermissionStatus> {
+    const nativeModule = getNativeModule();
     if (!nativeModule) {
       throw ErrorHandler.nativeModuleUnavailable();
     }
@@ -214,6 +277,7 @@ const ExpoGaodeMapModuleWithHelpers = {
    * 注意：必须在前台权限已授予后才能请求
    */
   async requestBackgroundLocationPermission(): Promise<PermissionStatus> {
+    const nativeModule = getNativeModule();
     if (!nativeModule) {
       throw ErrorHandler.nativeModuleUnavailable();
     }
@@ -677,7 +741,17 @@ const ExpoGaodeMapModuleWithHelpers = {
 */
 export function getSDKConfig(): SDKConfig | null {
   return _sdkConfig;
-}
+};
+
+const ExpoGaodeMapModuleWithHelpers = new Proxy(helperMethods, {
+  get(target, prop, receiver) {
+    if (Reflect.has(target, prop)) {
+      return Reflect.get(target, prop, receiver);
+    }
+    const nativeModule = getNativeModule(true);
+    return nativeModule ? Reflect.get(nativeModule as object, prop) : undefined;
+  },
+}) as typeof helperMethods & ExpoGaodeMapModule;
 
 /**
 * 获取用于 Web API 的 webKey（若未初始化或未提供则返回 undefined）

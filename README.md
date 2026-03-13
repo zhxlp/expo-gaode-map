@@ -36,7 +36,7 @@ Includes complete API documentation, usage guides, and example code:
 - ✅ High test coverage (75.7%, 207 unit tests)
 - ✅ User-friendly error notification system
 - ✅ Custom Marker overlay support
-- ✅ Optimized map loading by default to reduce memory usage
+- ✅ Lean native implementation with simpler lifecycle management and lower maintenance cost
 
 ### Optional Modules
 - 🔍 **Search Functionality** (expo-gaode-map-search) - POI search, nearby search, keyword search, geocoding, etc.

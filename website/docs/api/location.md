@@ -3,6 +3,10 @@
 完整的定位功能 API 文档。
 
 > ⚠️ **权限要求**: 所有定位 API 都需要定位权限。使用前请先调用权限检查和请求方法。
+>
+> ⚠️ **隐私要求**: 调用 `initSDK`、定位、地图等任何高德能力前，必须先调用：
+> - `ExpoGaodeMapModule.setPrivacyShow(true, true)`
+> - `ExpoGaodeMapModule.setPrivacyAgree(true)`
 
 ## 定位控制
 
@@ -11,7 +15,11 @@
 ```tsx
 import { ExpoGaodeMapModule } from 'expo-gaode-map';
 
-// 初始化 SDK（使用 Config Plugin 时可传空对象）
+// 1. 先完成隐私合规
+ExpoGaodeMapModule.setPrivacyShow(true, true);
+ExpoGaodeMapModule.setPrivacyAgree(true);
+
+// 2. 初始化 SDK（使用 Config Plugin 时原生 Key 可省略）
 ExpoGaodeMapModule.initSDK({
   webKey: 'your-web-api-key', // 仅在使用 Web API 时需要
 });
@@ -31,6 +39,8 @@ const location = await ExpoGaodeMapModule.getCurrentLocation();
 | 方法 | 参数 | 返回值 | 说明 |
 |------|------|--------|------|
 | `initSDK` | `{androidKey?, iosKey?, webKey?}` | `void` | 初始化 SDK（使用 Config Plugin 时原生 Key 可省略） |
+| `setPrivacyShow` | `(hasShow: boolean, hasContainsPrivacy: boolean)` | `void` | 同步隐私弹窗展示状态，必须先于 `initSDK` 调用 |
+| `setPrivacyAgree` | `(hasAgree: boolean)` | `void` | 同步用户隐私同意状态，必须先于 `initSDK` 调用 |
 | `setLoadWorldVectorMap` | `enabled: boolean` | `void` | 开启/关闭世界向量地图（海外地图），需在初始化前调用 |
 | `start` | - | `void` | 开始连续定位 |
 | `stop` | - | `void` | 停止定位 |

@@ -6,6 +6,17 @@ import { ExpoGaodeMapNavigationModule as ExpoGaodeMapNavigationModuleType } from
  * 
  * 提供路径规划功能，包括驾车、步行、骑行、公交、货车等多种出行方式
  */
-const ExpoGaodeMapNavigationModule = requireNativeModule<ExpoGaodeMapNavigationModuleType>('ExpoGaodeMapNavigation');
+let nativeModuleCache: ExpoGaodeMapNavigationModuleType | null = null;
 
-export default ExpoGaodeMapNavigationModule;
+function getNativeModule(): ExpoGaodeMapNavigationModuleType {
+  if (!nativeModuleCache) {
+    nativeModuleCache = requireNativeModule<ExpoGaodeMapNavigationModuleType>('ExpoGaodeMapNavigation');
+  }
+  return nativeModuleCache;
+}
+
+export default new Proxy({} as ExpoGaodeMapNavigationModuleType, {
+  get(_target, prop) {
+    return Reflect.get(getNativeModule() as object, prop);
+  },
+});

@@ -115,18 +115,10 @@ class ExpoGaodeMapView: ExpoView, MAMapViewDelegate, UIGestureRecognizerDelegate
     required init(appContext: AppContext? = nil) {
         super.init(appContext: appContext)
         
-        // 确保隐私合规已设置
-        MAMapView.updatePrivacyAgree(.didAgree)
-        MAMapView.updatePrivacyShow(.didShow, privacyInfo: .didContain)
+        GaodeMapPrivacyManager.applyPrivacyState()
         
         // 创建 MAMapView
-        // 尝试从预加载池获取 MapView
-        if let preloaded = MapPreloadManager.shared.getPreloadedMapView() {
-            mapView = preloaded
-            mapView.frame = bounds
-        } else {
-            mapView = MAMapView(frame: bounds)
-        }
+        mapView = MAMapView(frame: bounds)
         
         mapView.delegate = self
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]

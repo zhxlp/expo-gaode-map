@@ -4,12 +4,24 @@ This guide explains how to initialize the AMap SDK and configure permissions.
 
 ## SDK Initialization
 
+::: warning Privacy Compliance
+Before calling any AMap capability, you must first complete runtime privacy consent:
+- `ExpoGaodeMapModule.setPrivacyShow(true, true)`
+- `ExpoGaodeMapModule.setPrivacyAgree(true)`
+
+Config Plugin only writes native keys and permission declarations. It does **not** replace the runtime privacy step.
+:::
+
 ### Basic Initialization
 
-Initialize the SDK before using any map features:
+Initialize the SDK only after privacy consent is completed:
 
 ```typescript
 import { ExpoGaodeMapModule } from 'expo-gaode-map';
+
+// Sync privacy status first
+ExpoGaodeMapModule.setPrivacyShow(true, true);
+ExpoGaodeMapModule.setPrivacyAgree(true);
 
 // Enable World Vector Map (Overseas Map) support
 // Must be called before initSDK
@@ -129,7 +141,7 @@ console.log('Has location permission:', hasPermission);
 
 1. Display privacy policy to users
 2. Obtain user consent
-3. Configure AMap SDK privacy compliance interface
+3. Call `setPrivacyShow(true, true)` and `setPrivacyAgree(true)`
 
 ### Configure Privacy Compliance
 
@@ -137,10 +149,8 @@ console.log('Has location permission:', hasPermission);
 import { ExpoGaodeMapModule } from 'expo-gaode-map';
 
 // Update privacy consent status
-ExpoGaodeMapModule.updatePrivacyAgree(true);
-
-// Update privacy info status
-ExpoGaodeMapModule.updatePrivacyShow(true, true);
+ExpoGaodeMapModule.setPrivacyAgree(true);
+ExpoGaodeMapModule.setPrivacyShow(true, true);
 ```
 
 ### Privacy Compliance Process
@@ -150,8 +160,8 @@ ExpoGaodeMapModule.updatePrivacyShow(true, true);
 function showPrivacyPolicy() {
   // Display your privacy policy UI
   // After user agrees:
-  ExpoGaodeMapModule.updatePrivacyAgree(true);
-  ExpoGaodeMapModule.updatePrivacyShow(true, true);
+  ExpoGaodeMapModule.setPrivacyAgree(true);
+  ExpoGaodeMapModule.setPrivacyShow(true, true);
 }
 
 // 2. Then initialize SDK
@@ -251,8 +261,8 @@ function App() {
   async function initializeMap() {
     try {
       // 1. Configure privacy compliance
-      ExpoGaodeMapModule.updatePrivacyAgree(true);
-      ExpoGaodeMapModule.updatePrivacyShow(true, true);
+      ExpoGaodeMapModule.setPrivacyAgree(true);
+      ExpoGaodeMapModule.setPrivacyShow(true, true);
 
       // 2. Initialize SDK
       ExpoGaodeMapModule.initSDK({

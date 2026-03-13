@@ -14,22 +14,43 @@ import com.amap.api.maps.MapsInitializer
  * - 获取 SDK 版本信息
  */
 object SDKInitializer {
-    
-    /** 隐私协议是否已同意（进程内缓存） */
-    private var privacyAgreed = true
+    private var privacyAgreed = false
+    private var privacyShown = false
+    private var privacyContains = false
 
+    fun setPrivacyShow(context: Context, hasShow: Boolean, hasContainsPrivacy: Boolean) {
+        privacyShown = hasShow
+        privacyContains = hasContainsPrivacy
+        applyPrivacyState(context)
+    }
 
-    
-    fun restorePrivacyState(context: Context) {
+    fun setPrivacyAgree(context: Context, hasAgree: Boolean) {
+        privacyAgreed = hasAgree
+        applyPrivacyState(context)
+    }
+
+    fun applyPrivacyState(context: Context) {
         try {
-            // 同步到 SDK
-            MapsInitializer.updatePrivacyShow(context, true, true)
-            AMapLocationClient.updatePrivacyShow(context, true, true)
+            MapsInitializer.updatePrivacyShow(context, privacyShown, privacyContains)
+            AMapLocationClient.updatePrivacyShow(context, privacyShown, privacyContains)
             MapsInitializer.updatePrivacyAgree(context, privacyAgreed)
             AMapLocationClient.updatePrivacyAgree(context, privacyAgreed)
         } catch (e: Exception) {
-            android.util.Log.w("ExpoGaodeMap", "恢复隐私状态失败: ${e.message}")
+            android.util.Log.w("ExpoGaodeMap", "同步隐私状态失败: ${e.message}")
         }
+    }
+
+    fun isPrivacyReady(): Boolean {
+        return privacyShown && privacyContains && privacyAgreed
+    }
+
+    fun getPrivacyStatus(): Map<String, Boolean> {
+        return mapOf(
+            "hasShow" to privacyShown,
+            "hasContainsPrivacy" to privacyContains,
+            "hasAgree" to privacyAgreed,
+            "isReady" to isPrivacyReady()
+        )
     }
 
     /**
@@ -41,12 +62,12 @@ object SDKInitializer {
      */
     fun initSDK(context: Context, androidKey: String) {
         // 检查隐私协议状态
-        if (!privacyAgreed) {
-            // 使用 Kotlin 模块的 CodedException，让 JS 能收到标准化异常
-            throw expo.modules.kotlin.exception.CodedException("用户未同意隐私协议，无法初始化 SDK")
+        if (!isPrivacyReady()) {
+            throw expo.modules.kotlin.exception.CodedException("隐私协议未完成确认，请先调用 setPrivacyShow/setPrivacyAgree")
         }
         
         try {
+            applyPrivacyState(context)
             // 设置 API Key
             MapsInitializer.setApiKey(androidKey)
             AMapLocationClient.setApiKey(androidKey)

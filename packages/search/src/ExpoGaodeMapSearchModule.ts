@@ -37,8 +37,6 @@ function ensureBaseInstalled() {
   }
 }
 
-ensureBaseInstalled();
-
 declare class ExpoGaodeMapSearchModuleType {
   /**
    * 初始化搜索模块（可选）
@@ -114,6 +112,18 @@ declare class ExpoGaodeMapSearchModuleType {
  *
  * 提供 POI 搜索、周边搜索、沿途搜索、多边形搜索和输入提示功能
  */
-const ExpoGaodeMapSearchModule = requireNativeModule<ExpoGaodeMapSearchModuleType>('ExpoGaodeMapSearch');
+let nativeModuleCache: ExpoGaodeMapSearchModuleType | null = null;
 
-export default ExpoGaodeMapSearchModule;
+function getNativeModule(): ExpoGaodeMapSearchModuleType {
+  ensureBaseInstalled();
+  if (!nativeModuleCache) {
+    nativeModuleCache = requireNativeModule<ExpoGaodeMapSearchModuleType>('ExpoGaodeMapSearch');
+  }
+  return nativeModuleCache;
+}
+
+export default new Proxy({} as ExpoGaodeMapSearchModuleType, {
+  get(_target, prop) {
+    return Reflect.get(getNativeModule() as object, prop);
+  },
+});

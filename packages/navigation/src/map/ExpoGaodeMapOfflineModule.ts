@@ -178,5 +178,17 @@ declare class NaviMapOfflineModule extends NativeModule<OfflineMapEvents> {
 
 }
 
-// 获取原生模块实例
-export default requireNativeModule<NaviMapOfflineModule>('ExpoGaodeMapOffline');
+let nativeModuleCache: NaviMapOfflineModule | null = null;
+
+function getNativeModule(): NaviMapOfflineModule {
+  if (!nativeModuleCache) {
+    nativeModuleCache = requireNativeModule<NaviMapOfflineModule>('ExpoGaodeMapOffline');
+  }
+  return nativeModuleCache;
+}
+
+export default new Proxy({} as NaviMapOfflineModule, {
+  get(_target, prop) {
+    return Reflect.get(getNativeModule() as object, prop);
+  },
+});

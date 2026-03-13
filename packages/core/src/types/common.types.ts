@@ -15,6 +15,15 @@ export interface SDKConfig {
   /** web api key 如果要使用expo-gaode-map-web-api相关的功能，需要配置web api key*/
   webKey?: string;
 }
+/**
+ * 隐私政策状态
+ */
+export interface PrivacyStatus {
+  hasShow: boolean;
+  hasContainsPrivacy: boolean;
+  hasAgree: boolean;
+  isReady: boolean;
+}
 
 /**
  * 权限状态（增强版，支持 Android 14+ 和 iOS 17+）

@@ -34,10 +34,22 @@ function getNativeModule(optional = false): ExpoGaodeMapModule | null {
   }
 }
 
+function getBoundNativeValue(
+  module: ExpoGaodeMapModule,
+  prop: PropertyKey
+): unknown {
+  const value = Reflect.get(module as object, prop, module as object);
+  if (typeof value === 'function') {
+    return (...args: unknown[]) =>
+      (value as (...fnArgs: unknown[]) => unknown).apply(module, args);
+  }
+  return value;
+}
+
 const nativeModule = new Proxy({} as ExpoGaodeMapModule, {
   get(_target, prop) {
     const module = getNativeModule(true);
-    return module ? Reflect.get(module as object, prop) : undefined;
+    return module ? getBoundNativeValue(module, prop) : undefined;
   },
 });
 
@@ -813,7 +825,7 @@ const ExpoGaodeMapModuleWithHelpers = new Proxy(helperMethods, {
       return undefined;
     }
 
-    const value = Reflect.get(nativeModule as object, prop);
+    const value = Reflect.get(nativeModule as object, prop, nativeModule as object);
     if (
       typeof prop === 'string' &&
       privacySensitiveMethodNames.has(prop) &&
@@ -825,7 +837,7 @@ const ExpoGaodeMapModuleWithHelpers = new Proxy(helperMethods, {
       };
     }
 
-    return value;
+    return getBoundNativeValue(nativeModule, prop);
   },
 }) as typeof helperMethods & ExpoGaodeMapModule;
 

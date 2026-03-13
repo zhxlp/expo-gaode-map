@@ -1,10 +1,16 @@
 import * as React from 'react';
 import { StyleSheet } from 'react-native';
+import type { ViewProps } from 'react-native';
 import type { HeatMapProps } from '../../types';
+import type { LatLng } from '../../types';
 import { normalizeLatLngList } from '../../utils/GeoUtils';
 import { createLazyNativeViewManager } from '../../utils/lazyNativeViewManager';
 
-const getNativeHeatMap = createLazyNativeViewManager<any>('HeatMapView');
+type NativeHeatMapProps = Omit<HeatMapProps, 'data'> & ViewProps & {
+  data: LatLng[];
+};
+
+const getNativeHeatMap = createLazyNativeViewManager<NativeHeatMapProps>('HeatMapView');
 
 
 /**

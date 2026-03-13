@@ -17,8 +17,19 @@ export interface ExpoGaodeMapNaviViewRef {
   stopNavigation: () => Promise<void>;
 }
 
+interface NativeExpoGaodeMapNaviViewRef {
+  startNavigation: (
+    startLatitude: number,
+    startLongitude: number,
+    endLatitude: number,
+    endLongitude: number
+  ) => Promise<void>;
+  stopNavigation: () => Promise<void>;
+}
 
-const getNativeView = createLazyNativeViewManager<ExpoGaodeMapNaviViewProps & { ref?: React.Ref<any> }>('ExpoGaodeMapNaviView');
+const getNativeView = createLazyNativeViewManager<
+  ExpoGaodeMapNaviViewProps & { ref?: React.Ref<NativeExpoGaodeMapNaviViewRef> }
+>('ExpoGaodeMapNaviView');
 
 /**
  * 高德导航视图组件
@@ -54,7 +65,7 @@ const getNativeView = createLazyNativeViewManager<ExpoGaodeMapNaviViewProps & { 
  * ```
  */
 export const ExpoGaodeMapNaviView = React.forwardRef<ExpoGaodeMapNaviViewRef, ExpoGaodeMapNaviViewProps>((props, ref) => {
-  const nativeRef = React.useRef<any>(null);
+  const nativeRef = React.useRef<NativeExpoGaodeMapNaviViewRef | null>(null);
   const NativeView = React.useMemo(() => getNativeView(), []);
   
   // 创建 API 引用

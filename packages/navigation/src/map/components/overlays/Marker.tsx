@@ -3,7 +3,12 @@ import type { MarkerProps } from '../../types';
 import { normalizeLatLng, normalizeLatLngList } from '../../utils/GeoUtils';
 import { createLazyNativeViewManager } from '../../utils/lazyNativeViewManager';
 
-const getNativeMarkerView = createLazyNativeViewManager<any>('MarkerView');
+type NativeMarkerViewProps = Omit<MarkerProps, 'position'> & {
+  latitude: number;
+  longitude: number;
+};
+
+const getNativeMarkerView = createLazyNativeViewManager<NativeMarkerViewProps>('MarkerView');
 
 /**
  * Marker 组件 - 完全声明式 API

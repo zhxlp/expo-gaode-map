@@ -122,8 +122,20 @@ function getNativeModule(): ExpoGaodeMapSearchModuleType {
   return nativeModuleCache;
 }
 
+function getBoundNativeValue(
+  module: ExpoGaodeMapSearchModuleType,
+  prop: PropertyKey
+): unknown {
+  const value = Reflect.get(module as object, prop, module as object);
+  if (typeof value === 'function') {
+    return (...args: unknown[]) =>
+      (value as (...fnArgs: unknown[]) => unknown).apply(module, args);
+  }
+  return value;
+}
+
 export default new Proxy({} as ExpoGaodeMapSearchModuleType, {
   get(_target, prop) {
-    return Reflect.get(getNativeModule() as object, prop);
+    return getBoundNativeValue(getNativeModule(), prop);
   },
 });

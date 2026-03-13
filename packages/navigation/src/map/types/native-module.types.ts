@@ -46,7 +46,7 @@ export interface ExpoGaodeMapModule extends NativeModule<ExpoGaodeMapModuleEvent
    * 设置是否显示隐私政策弹窗
    * @deprecated 请优先使用 `setPrivacyConfig`
    */
-  setPrivacyShow(hasShow: boolean, hasContainsPrivacy: boolean): void;
+  setPrivacyShow(hasShow: boolean, hasContainsPrivacy?: boolean): void;
 
   /**
    * 设置用户是否同意隐私政策

@@ -147,10 +147,10 @@ const helperMethods = {
    * 设置是否显示隐私政策弹窗
    * @deprecated 请优先使用 `setPrivacyConfig`
    */
-  setPrivacyShow(hasShow: boolean, hasContainsPrivacy: boolean): void {
+  setPrivacyShow(hasShow: boolean, hasContainsPrivacy?: boolean): void {
     const nativeModule = getNativeModule();
     if (!nativeModule) throw ErrorHandler.nativeModuleUnavailable();
-    nativeModule.setPrivacyShow(hasShow, hasContainsPrivacy);
+    nativeModule.setPrivacyShow(hasShow, hasContainsPrivacy ?? hasShow);
   },
 
   /**
@@ -192,7 +192,10 @@ const helperMethods = {
     if (typeof config.privacyVersion === 'string') {
       nativeModule.setPrivacyVersion(config.privacyVersion);
     }
-    nativeModule.setPrivacyShow(config.hasShow, config.hasContainsPrivacy);
+    nativeModule.setPrivacyShow(
+      config.hasShow,
+      config.hasContainsPrivacy ?? config.hasShow
+    );
     nativeModule.setPrivacyAgree(config.hasAgree);
   },
 
@@ -848,7 +851,8 @@ export function getSDKConfig(): SDKConfig | null {
   return _sdkConfig;
 };
 
-export type ExpoGaodeMapModule = typeof helperMethods & NativeExpoGaodeMapModule;
+export type ExpoGaodeMapModule =
+  Omit<NativeExpoGaodeMapModule, keyof typeof helperMethods> & typeof helperMethods;
 
 const ExpoGaodeMapModuleWithHelpers = new Proxy(helperMethods, {
   get(target, prop, receiver) {

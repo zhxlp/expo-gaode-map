@@ -6,6 +6,7 @@ import type { NativeModule } from 'expo';
 
 import type {
   LatLng,
+  PrivacyConfig,
   PrivacyStatus,
   SDKConfig,
   PermissionStatus,
@@ -41,14 +42,37 @@ export interface ExpoGaodeMapModule extends NativeModule<ExpoGaodeMapModuleEvent
    */
   initSDK(config: SDKConfig): void;
 
+  /**
+   * 设置是否显示隐私政策弹窗
+   * @deprecated 请优先使用 `setPrivacyConfig`
+   */
   setPrivacyShow(hasShow: boolean, hasContainsPrivacy: boolean): void;
 
+  /**
+   * 设置用户是否同意隐私政策
+   * @deprecated 请优先使用 `setPrivacyConfig`
+   */
   setPrivacyAgree(hasAgree: boolean): void;
 
+  /**
+   * 一次性设置完整的隐私状态
+   * 推荐作为业务层唯一入口调用
+   */
+  setPrivacyConfig(config: PrivacyConfig): void;
+
+  /**
+   * 设置当前隐私协议版本，用于在协议变更时使旧同意失效
+   */
   setPrivacyVersion(version: string): void;
 
+  /**
+   * 清空已持久化的隐私同意状态
+   */
   resetPrivacyConsent(): void;
 
+  /**
+   * 获取当前隐私政策状态
+   */
   getPrivacyStatus(): PrivacyStatus;
 
   /**

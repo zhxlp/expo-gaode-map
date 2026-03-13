@@ -11,7 +11,7 @@ import {
 } from './types';
 import type { ExpoGaodeMapModule as NativeExpoGaodeMapModule } from './types/native-module.types';
 import { ErrorHandler, ErrorLogger } from './utils/ErrorHandler';
-import { PrivacyStatus, SDKConfig, PermissionStatus } from './types/common.types';
+import { PrivacyConfig, PrivacyStatus, SDKConfig, PermissionStatus } from './types/common.types';
 import { normalizeLatLng, normalizeLatLngList } from './utils/GeoUtils';
 
 let nativeModuleCache: NativeExpoGaodeMapModule | null = null;
@@ -147,36 +147,50 @@ const helperMethods = {
     return _isSDKInitialized;
   },
 
+  /**
+   * 设置是否显示隐私政策弹窗
+   * @deprecated 请优先使用 `setPrivacyConfig`
+   */
   setPrivacyShow(hasShow: boolean, hasContainsPrivacy: boolean): void {
     const nativeModule = getNativeModule();
     if (!nativeModule) throw ErrorHandler.nativeModuleUnavailable();
     nativeModule.setPrivacyShow(hasShow, hasContainsPrivacy);
   },
 
+  /**
+   * 设置用户是否同意隐私政策
+   * @deprecated 请优先使用 `setPrivacyConfig`
+   */
   setPrivacyAgree(hasAgree: boolean): void {
     const nativeModule = getNativeModule();
     if (!nativeModule) throw ErrorHandler.nativeModuleUnavailable();
     nativeModule.setPrivacyAgree(hasAgree);
   },
 
+  /**
+   * 设置当前隐私协议版本
+   * 当版本号变化时，之前的同意状态会失效
+   */
   setPrivacyVersion(version: string): void {
     const nativeModule = getNativeModule();
     if (!nativeModule) throw ErrorHandler.nativeModuleUnavailable();
     nativeModule.setPrivacyVersion(version);
   },
 
+  /**
+   * 清空已持久化的隐私同意状态
+   */
   resetPrivacyConsent(): void {
     const nativeModule = getNativeModule();
     if (!nativeModule) throw ErrorHandler.nativeModuleUnavailable();
     nativeModule.resetPrivacyConsent();
   },
 
-  setPrivacyConfig(config: {
-    hasShow: boolean;
-    hasContainsPrivacy: boolean;
-    hasAgree: boolean;
-    privacyVersion?: string;
-  }): void {
+  /**
+   * 一次性同步完整的隐私状态
+   * 推荐业务层只调用这个方法
+   */
+  setPrivacyConfig(config: PrivacyConfig): void {
     const nativeModule = getNativeModule();
     if (!nativeModule) throw ErrorHandler.nativeModuleUnavailable();
     if (typeof config.privacyVersion === 'string') {

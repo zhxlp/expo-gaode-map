@@ -15,6 +15,21 @@ export interface SDKConfig {
   /** web api key 如果要使用expo-gaode-map-web-api相关的功能，需要配置web api key*/
   webKey?: string;
 }
+
+/**
+ * 隐私同意配置
+ * 推荐优先使用该配置对象一次性完成隐私状态同步
+ */
+export interface PrivacyConfig {
+  /** 是否已经向用户展示隐私弹窗或隐私说明 */
+  hasShow: boolean;
+  /** 展示内容中是否包含隐私政策条款 */
+  hasContainsPrivacy: boolean;
+  /** 用户是否已经同意隐私政策 */
+  hasAgree: boolean;
+  /** 可选的隐私协议版本号；变更后会要求重新同意 */
+  privacyVersion?: string;
+}
 /**
  * 隐私政策状态
  */

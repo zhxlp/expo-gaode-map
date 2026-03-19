@@ -45,5 +45,6 @@
   },
   "peerDependencies": {
     "react-native": "*"
-  }
+  },
+  "dependencies": {}
 }
